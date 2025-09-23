@@ -3,23 +3,16 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Blueprint/UserWidget.h"
-#include "MenuInterface.h"
+#include "MenuWidget.h"
 #include "MainMenu.generated.h"
 
 /**
  *
  */
 UCLASS()
-class PUZZLEPLATFORM_API UMainMenu : public UUserWidget
+class PUZZLEPLATFORM_API UMainMenu : public UMenuWidget
 {
 	GENERATED_BODY()
-public:
-	void SetMenuInterface(IMenuInterface* MenuInter);
-
-	void Setup();
-	void Teardown();
-
 protected:
 	virtual bool Initialize();
 
@@ -31,7 +24,13 @@ private:
 	class UButton* JoinButton;
 
 	UPROPERTY(meta = (BindWidget))
+	class UButton* QuitButton;
+
+	UPROPERTY(meta = (BindWidget))
 	class UButton* CancelJoinMenuButton;
+
+	UPROPERTY(meta = (BindWidget))
+	class UButton* ConfirmJoinMenuButton;
 
 	UPROPERTY(meta = (BindWidget))
 	class UWidgetSwitcher* MenuSwitcher;
@@ -43,13 +42,14 @@ private:
 	class UWidget* JoinMenu;
 
 	UPROPERTY(meta = (BindWidget))
-	class UButton* ConfirmJoinMenuButton;
-
-	UPROPERTY(meta = (BindWidget))
 	class UEditableTextBox* IPAddressField;
 
 	UFUNCTION()
 	void HostServer();
+
+	UFUNCTION()
+	void JoinServer();
+
 
 	UFUNCTION()
 	void OpenJoinMenu();
@@ -58,7 +58,5 @@ private:
 	void OpenMainMenu();
 
 	UFUNCTION()
-	void JoinServer();
-
-	IMenuInterface* MenuInterface;
+	void QuitPressed();
 };

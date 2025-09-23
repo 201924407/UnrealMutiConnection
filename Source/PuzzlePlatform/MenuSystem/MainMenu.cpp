@@ -17,6 +17,9 @@ bool UMainMenu::Initialize()
 	if (!ensure(JoinButton != nullptr)) return false;
 	JoinButton->OnClicked.AddDynamic(this, &UMainMenu::OpenJoinMenu);
 
+	if (!ensure(QuitButton != nullptr)) return false;
+	QuitButton->OnClicked.AddDynamic(this, &UMainMenu::QuitPressed);
+
 	if (!ensure(CancelJoinMenuButton != nullptr)) return false;
 	CancelJoinMenuButton->OnClicked.AddDynamic(this, &UMainMenu::OpenMainMenu);
 
@@ -26,51 +29,21 @@ bool UMainMenu::Initialize()
 	return true;
 }
 
-void UMainMenu::SetMenuInterface(IMenuInterface* MenuInter)
-{
-	this->MenuInterface = MenuInter;
-}
-
-void UMainMenu::Setup()
-{
-	this->AddToViewport();
-
-	UWorld* World = GetWorld();
-	if (!ensure(World != nullptr)) return;
-
-	APlayerController* PlayerController = World->GetFirstPlayerController();
-	if (!ensure(PlayerController != nullptr)) return;
-
-	FInputModeUIOnly InputModeData;
-	InputModeData.SetWidgetToFocus(this->TakeWidget());
-	InputModeData.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
-
-	PlayerController->SetInputMode(InputModeData);
-
-	PlayerController->bShowMouseCursor = true;
-}
-
-void UMainMenu::Teardown()
-{
-	this->RemoveFromViewport();
-
-	UWorld* World = GetWorld();
-	if (!ensure(World != nullptr)) return;
-
-	APlayerController* PlayerController = World->GetFirstPlayerController();
-	if (!ensure(PlayerController != nullptr)) return;
-
-	FInputModeGameOnly InputModeData;
-	PlayerController->SetInputMode(InputModeData);
-
-	PlayerController->bShowMouseCursor = false;
-}
-
 void UMainMenu::HostServer()
 {
 	if (MenuInterface != nullptr)
 	{
 		MenuInterface->Host();
+	}
+}
+
+void UMainMenu::JoinServer()
+{
+	if (MenuInterface != nullptr)
+	{
+		if (!ensure(IPAddressField != nullptr)) return;
+		const FString& Address = IPAddressField->GetText().ToString();
+		MenuInterface->Join(Address);
 	}
 }
 
@@ -88,12 +61,13 @@ void UMainMenu::OpenMainMenu()
 	MenuSwitcher->SetActiveWidget(MainMenu);
 }
 
-void UMainMenu::JoinServer()
+void UMainMenu::QuitPressed()
 {
-	if (MenuInterface != nullptr)
-	{
-		if (!ensure(IPAddressField != nullptr)) return;
-		const FString& Address = IPAddressField->GetText().ToString();
-		MenuInterface->Join(Address);
-	}
+	UWorld* World = GetWorld();
+	if (!ensure(World != nullptr)) return;
+
+	APlayerController* PlayerController = World->GetFirstPlayerController();
+	if (!ensure(PlayerController != nullptr)) return;
+
+	PlayerController->ConsoleCommand("quit");
 }
